@@ -1,0 +1,1408 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+	<annotation>
+		<documentation>Configuracion de los servicios para la preativacion Masiva</documentation>
+		<version>1.0</version>
+	</annotation>
+	<servicios>
+		<servicio id="crear.suscriptor.rtbs">
+			<annotation>
+				<documentation>Comando para la creacion de un suscriptor en RTBS</documentation>
+			</annotation>
+			<comandos>
+				<comando delegador="crearSuscriptorRTBS" servicio="crear.suscriptor.rtbs">
+					<parametros>
+						<parametro formal="batchName" actual="batchName" />
+						<parametro formal="cantLineas" actual="cantLineas" />
+						<parametro formal="msisdn" actual="msisdn" />
+						<parametro formal="imsi" actual="imsi" />
+						<parametro formal="iccid" actual="iccid" />
+						<parametro formal="pin" actual="pin" />
+						<parametro formal="puk" actual="puk" />
+						<parametro formal="pin1" actual="pin1" />
+						<parametro formal="puk2" actual="puk2" />
+						<parametro formal="plan" actual="plan" />
+						<parametro formal="profile" actual="profile" />								
+						<parametro formal="_rc_reintentos" actual="_rc_reintentos" type="java.lang.Double" defaultValue="0" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>
+				<comando delegador="local" servicio="stm:setAll">
+					<parametros ambito="local">
+						<parametro formal="nameList" constante="_rc_resultado_create _rc_razon_create" />
+						<parametro formal="rvalor_1" actual="_rc_resultado" />
+						<parametro formal="rvalor_2" actual="_rc_razon" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>
+				<!-- ENVIO AL ARCHIVO DE SALIDA CUANDO SE REINTENTE Y NO SE LOGRE LA INSERCION -->
+				<comando delegador="reintentoCrearSuscriptorRTBS" servicio="crear.suscriptor.rtbs">
+					<condiciones>
+						<comando delegador="local" servicio="cond:in">
+							<parametros ambito="local">
+								<parametro formal="lvalor" actual="_rc_resultado_create" />
+								<parametro formal="rvalor" constante="100" />
+							</parametros>
+						</comando>
+						<comando delegador="local" servicio="cond:menor">
+							<parametros>
+								<parametro formal="lvalor" actual="_rc_reintentos" />
+								<parametro formal="rvalor" constante="3" type="java.lang.Double" />
+							</parametros>
+						</comando>
+					</condiciones>
+					<parametros ambito="global">
+						<parametro formal="_rc_reintentos" actual="xpath:@_rc_reintentos +1" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>				
+				<comando delegador="solicitudAprovisionamientoHLR" servicio="aprovisionar.suscriptor.hlr">
+					<condiciones>
+						<comando delegador="local" servicio="cond:in">
+							<parametros ambito="local">
+								<parametro formal="lvalor" actual="_rc_resultado_create" />
+								<parametro formal="rvalor" constante="0" />
+							</parametros>
+						</comando>
+					</condiciones>
+					<parametros ambito="global">
+						<parametro formal="_rc_reintentos_il" constante="0.0" type="java.lang.Double" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>
+				<!--  ENVIO DE REGISTRO A ARCHIVO SI EL CODIGO DE RTBS FUE 09 -->
+				<comando delegador="solicitudRegistroArchivo" servicio="generar.archivo.salida">
+					<condiciones>
+						<comando delegador="local" servicio="cond:in">
+							<parametros ambito="local">
+								<parametro formal="lvalor" actual="_rc_resultado_create" />
+								<parametro formal="rvalor" constante="100" />
+							</parametros>
+						</comando>
+						<comando delegador="local" servicio="cond:menor">
+							<parametros>
+								<parametro formal="lvalor" actual="_rc_reintentos" />
+								<parametro formal="rvalor" constante="3" type="java.lang.Double" />
+								<parametro formal="negado" constante="true" type="java.lang.Boolean" />
+							</parametros>
+						</comando>
+					</condiciones>
+					<parametros ambito="global">
+						<parametro formal="error" constante="09" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>
+				<!-- ENVIO AL ARCHIVO DE SALIDA CUANDO NO SEA UN VALOR REINTENTABLE (100) ni cero -->
+				<comando delegador="solicitudRegistroArchivo" servicio="generar.archivo.salida">
+					<condiciones>
+						<comando delegador="local" servicio="cond:in">
+							<parametros ambito="local">
+								<parametro formal="lvalor" actual="_rc_resultado_create" />
+								<parametro formal="rvalor" constante="0 100" />
+								<parametro formal="negado" constante="true" type="java.lang.Boolean" />
+							</parametros>
+						</comando>
+					</condiciones>
+					<parametros ambito="global">
+						<parametro formal="error" constante="09" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>
+				<comando delegador="registrarEstado" servicio="registrar.estado">
+					<parametros ambito="local">
+						<parametro formal="reportedFrom" constante="CCWS" />
+						<parametro formal="ERROR" actual="_rc_resultado_create" />
+						<parametro formal="ERROR_MSG" actual="_rc_razon_create" />
+						<parametro formal="sistema" constante="rtbs" />
+						<parametro formal="proceso" constante="preactivacion" />
+						<parametro formal="NOMARCHIVO" actual="batchName" />
+						<parametro formal="ID" actual="traceid" />
+						<parametro formal="FECHA" actual="fecha" />
+						<parametro formal="GSM" actual="msisdn" />
+						<parametro formal="IMSI" actual="imsi" />
+						<parametro formal="ICCID" actual="iccid" />
+						<parametro formal="PIN" actual="pin" />
+						<parametro formal="PIN1" actual="pin1" />
+						<parametro formal="PUK" actual="puk" />
+						<parametro formal="PUK2" actual="puk2" />
+						<parametro formal="profile" actual="profile" />
+					</parametros>
+				</comando>
+			</comandos>
+		</servicio>	
+		
+		<!-- ********************************************************************************************* -->		
+		<servicio id="crear.suscriptor.solo.rtbs">
+			<annotation>
+				<documentation>Comando para la creacion de un suscriptor Unicamente en RTBS</documentation>
+			</annotation>
+			<comandos>
+				<comando delegador="crearSuscriptorRTBS" servicio="crear.suscriptor.solo.rtbs">
+					<parametros>
+						<parametro formal="batchName" actual="batchName" />
+						<parametro formal="cantLineas" actual="cantLineas" />
+						<parametro formal="msisdn" actual="msisdn" />
+						<parametro formal="imsi" actual="imsi" />
+						<parametro formal="iccid" actual="iccid" />
+						<parametro formal="pin" actual="pin" />
+						<parametro formal="puk" actual="puk" />
+						<parametro formal="pin1" actual="pin1" />
+						<parametro formal="puk2" actual="puk2" />
+						<parametro formal="plan" actual="plan" />
+						<parametro formal="profile" actual="profile" />								
+						<parametro formal="_rc_reintentos" actual="_rc_reintentos" type="java.lang.Double" defaultValue="0" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>
+				<comando delegador="local" servicio="stm:setAll">
+					<parametros ambito="local">
+						<parametro formal="nameList" constante="_rc_resultado_create _rc_razon_create" />
+						<parametro formal="rvalor_1" actual="_rc_resultado" />
+						<parametro formal="rvalor_2" actual="_rc_razon" />	
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>
+				<!-- ENVIO AL ARCHIVO DE SALIDA CUANDO SE REINTENTE Y NO SE LOGRE LA INSERCION -->
+				<comando delegador="reintentoCrearSuscriptorRTBS" servicio="crear.suscriptor.solo.rtbs">
+					<condiciones>
+						<comando delegador="local" servicio="cond:in">
+							<parametros ambito="local">
+								<parametro formal="lvalor" actual="_rc_resultado_create" />
+								<parametro formal="rvalor" constante="100" />
+							</parametros>
+						</comando>
+						<comando delegador="local" servicio="cond:menor">
+							<parametros>
+								<parametro formal="lvalor" actual="_rc_reintentos" />
+								<parametro formal="rvalor" constante="3" type="java.lang.Double" />
+							</parametros>
+						</comando>
+					</condiciones>
+					<parametros ambito="global">
+						<parametro formal="_rc_reintentos" actual="xpath:@_rc_reintentos +1" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>				
+								
+				<comando delegador="registrarSuscriptorIVR" servicio="registrar.suscriptor.ivr">
+					<condiciones>
+						<comando delegador="local" servicio="cond:in">
+							<parametros ambito="local">
+								<parametro formal="lvalor" actual="_rc_resultado_create" />
+								<parametro formal="rvalor" constante="0" />
+							</parametros>
+						</comando>
+					</condiciones>
+					<parametros>
+						<parametro formal="relatesTo" actual="relatesTo" />
+						<parametro formal="status" actual="status" />
+						<parametro formal="sMessage" actual="sMessage" />
+						<parametro formal="task" actual="task" />
+						<parametro formal="order" actual="order" />
+						<parametro formal="batchName" actual="batchName" />
+						<parametro formal="msisdn" actual="msisdn" />
+						<parametro formal="imsi" actual="imsi" />
+						<parametro formal="iccid" actual="iccid" />
+						<parametro formal="pin" actual="pin" />
+						<parametro formal="puk" actual="puk" />
+						<parametro formal="pin1" actual="pin1" />
+						<parametro formal="puk2" actual="puk2" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>				
+				<comando delegador="local" servicio="stm:setAll">
+					<parametros ambito="local">
+						<parametro formal="nameList"
+							constante="_rc_resultado_ivr _rc_razon_ivr" />
+						<parametro formal="rvalor_1"
+							actual="_rc_resultado" />
+						<parametro formal="rvalor_2" actual="_rc_razon" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>
+				<comando delegador="ArchivoErrorIVR" servicio="archivo.error.ivr">
+					<condiciones>
+						<comando delegador="local" servicio="cond:in">
+							<parametros ambito="local">
+								<parametro formal="lvalor" actual="_rc_resultado_ivr" />
+								<parametro formal="rvalor" constante="0" />
+								<parametro formal="negado" constante="true" type="java.lang.Boolean" />
+							</parametros>
+						</comando>
+					</condiciones>
+					<parametros ambito="global">
+						<parametro formal="error" actual="_rc_resultado_ivr" />
+						<parametro formal="razon" actual="_rc_razon_ivr" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>
+				
+				<comando delegador="cargarUsuario3gAutenticador" servicio="cargar.usuario.autenticador">
+					<condiciones>
+						<comando delegador="local" servicio="cond:in">
+							<parametros ambito="local">
+								<parametro formal="lvalor" actual="_rc_resultado_create" />
+								<parametro formal="rvalor" constante="0" />
+							</parametros>
+						</comando>
+						<comando delegador="local" servicio="cond:in">
+							<parametros ambito="local">
+								<parametro formal="lvalor" actual="profile" />
+								<parametro formal="rvalor" constante="05 08" />
+							</parametros>
+						</comando>
+					</condiciones>
+					<parametros>						
+						<parametro formal="batchName" actual="batchName" />
+						<parametro formal="msisdn" actual="msisdn" />
+						<parametro formal="imsi" actual="imsi" />
+						<parametro formal="iccid" actual="iccid" />
+						<parametro formal="pin" actual="pin" />
+						<parametro formal="puk" actual="puk" />
+						<parametro formal="pin1" actual="pin1" />
+						<parametro formal="puk2" actual="puk2" />
+						<parametro formal="plan" actual="plan" />
+						<parametro formal="profile" actual="profile" />		
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>	
+				<comando delegador="local" servicio="stm:setAll">
+					<parametros ambito="local">
+						<parametro formal="nameList"
+							constante="_rc_resultado_aut _rc_razon_aut" />
+						<parametro formal="rvalor_1"
+							actual="_rc_resultado" />
+						<parametro formal="rvalor_2" actual="_rc_razon" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>
+				<comando delegador="ArchivoErrorAutenticador" servicio="archivo.error.autenticador">
+					<condiciones>
+						<comando delegador="local" servicio="cond:in">
+							<parametros ambito="local">
+								<parametro formal="lvalor" actual="_rc_resultado_aut" />
+								<parametro formal="rvalor" constante="0" />
+								<parametro formal="negado" constante="true" type="java.lang.Boolean" />
+							</parametros>
+						</comando>
+					</condiciones>
+					<parametros ambito="global">
+						<parametro formal="error" actual="_rc_resultado_aut" />
+						<parametro formal="razon" actual="_rc_razon_aut" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>
+				
+				<!-- ENVIO AL ARCHIVO DE SALIDA CUANDO EL RESULTADO DE RTBS SEA EXITOSO -->
+				<comando delegador="solicitudRegistroArchivo" servicio="generar.archivo.salida">
+					<condiciones>
+						<comando delegador="local" servicio="cond:in">
+							<parametros ambito="local">
+								<parametro formal="lvalor" actual="_rc_resultado_create" />
+								<parametro formal="rvalor" constante="0" />
+							</parametros>
+						</comando>
+					</condiciones>
+					<parametros ambito="global">
+						<parametro formal="error" constante="0"/>
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>
+				<!--  ENVIO DE REGISTRO A ARCHIVO SI EL CODIGO DE RTBS FUE 09 -->
+				<comando delegador="solicitudRegistroArchivo" servicio="generar.archivo.salida">
+					<condiciones>
+						<comando delegador="local" servicio="cond:in">
+							<parametros ambito="local">
+								<parametro formal="lvalor" actual="_rc_resultado_create" />
+								<parametro formal="rvalor" constante="100" />
+							</parametros>
+						</comando>
+						<comando delegador="local" servicio="cond:menor">
+							<parametros>
+								<parametro formal="lvalor" actual="_rc_reintentos" />
+								<parametro formal="rvalor" constante="3" type="java.lang.Double" />
+								<parametro formal="negado" constante="true" type="java.lang.Boolean" />
+							</parametros>
+						</comando>
+					</condiciones>
+					<parametros ambito="global">
+						<parametro formal="error" constante="09" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>
+				<!-- ENVIO AL ARCHIVO DE SALIDA CUANDO NO SEA UN VALOR REINTENTABLE (100) ni cero -->
+				<comando delegador="solicitudRegistroArchivo" servicio="generar.archivo.salida">
+					<condiciones>
+						<comando delegador="local" servicio="cond:in">
+							<parametros ambito="local">
+								<parametro formal="lvalor" actual="_rc_resultado_create" />
+								<parametro formal="rvalor" constante="0 100" />
+								<parametro formal="negado" constante="true" type="java.lang.Boolean" />
+							</parametros>
+						</comando>
+					</condiciones>
+					<parametros ambito="global">
+						<parametro formal="error" constante="09" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>
+				
+				
+				<comando delegador="registrarEstado" servicio="registrar.estado">
+					<parametros ambito="local">
+						<parametro formal="reportedFrom" constante="CCWS" />
+						<parametro formal="ERROR" actual="_rc_resultado_create" />
+						<parametro formal="ERROR_MSG" actual="_rc_razon_create" />
+						<parametro formal="sistema" constante="rtbs" />
+						<parametro formal="proceso" constante="preactivacion" />
+						<parametro formal="NOMARCHIVO" actual="batchName" />
+						<parametro formal="ID" actual="traceid" />
+						<parametro formal="FECHA" actual="fecha" />
+						<parametro formal="GSM" actual="msisdn" />
+						<parametro formal="IMSI" actual="imsi" />
+						<parametro formal="ICCID" actual="iccid" />
+						<parametro formal="PIN" actual="pin" />
+						<parametro formal="PIN1" actual="pin1" />
+						<parametro formal="PUK" actual="puk" />
+						<parametro formal="PUK2" actual="puk2" />
+						<parametro formal="profile" actual="profile" />						
+					</parametros>
+				</comando>
+			</comandos>
+		</servicio>	<!-- ********************************************************************************************* -->
+		
+		<servicio id="aprovisionar.suscriptor.hlr">
+			<annotation>
+				<documentation>Comando para el aprovisionamiento de un suscriptor en HLR</documentation>
+			</annotation>
+			<comandos>
+				<comando delegador="respaldarRequestService" servicio="respaldar.request.service">
+					<parametros ambito="global"></parametros>
+				</comando>
+				<comando delegador="aprovisionarSuscriptorHLR" servicio="aprovisionar.suscriptor.hlr">
+					<parametros>
+						<parametro formal="batchName" actual="batchName" />
+						<parametro formal="cantLineas" actual="cantLineas" />
+						<parametro formal="msisdn" actual="msisdn" />
+						<parametro formal="imsi" actual="imsi" />
+						<parametro formal="iccid" actual="iccid" />
+						<parametro formal="pin" actual="pin" />
+						<parametro formal="puk" actual="puk" />
+						<parametro formal="pin1" actual="pin1" />
+						<parametro formal="puk2" actual="puk2" />
+						<parametro formal="profile" actual="profile" />													
+						<parametro formal="_rc_reintentos_il" actual="_rc_reintentos_il" type="java.lang.Double" defaultValue="0" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>
+				<comando delegador="local" servicio="stm:setAll">
+					<parametros ambito="local">
+						<parametro formal="nameList" constante="_rc_resultado_aprov _rc_razon_aprov" />
+						<parametro formal="rvalor_1" actual="_rc_resultado" />
+						<parametro formal="rvalor_2" actual="_rc_razon" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>
+				<comando delegador="reintentoAprovisionarSuscriptorHLR" servicio="aprovisionar.suscriptor.hlr">
+					<condiciones>
+						<comando delegador="local" servicio="cond:in">
+							<parametros ambito="local">
+								<parametro formal="lvalor" actual="_rc_resultado_aprov" />
+								<parametro formal="rvalor" constante="200" />
+							</parametros>
+						</comando>
+						<comando delegador="local" servicio="cond:menor">
+							<parametros>
+								<parametro formal="lvalor" actual="_rc_reintentos_il" />
+								<parametro formal="rvalor" constante="3" type="java.lang.Double" />
+							</parametros>
+						</comando>
+					</condiciones>
+					<parametros ambito="global">
+						<parametro formal="_rc_reintentos_il" actual="xpath:@_rc_reintentos_il +1" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>
+				<!-- ROLLBACK CUANDO SE LLEGUE AL FINAL DE LOS REINTENTOS Y NO SE ENVIE LA SOLICITUD -->
+				<comando delegador="rollbackCrearSuscriptorRTBS" servicio="rollback.suscriptor.rtbs">
+					<condiciones>
+						<comando delegador="local" servicio="cond:in">
+							<parametros ambito="local">
+								<parametro formal="lvalor" actual="_rc_resultado_aprov" />
+								<parametro formal="rvalor" constante="200" />
+							</parametros>
+						</comando>
+						<comando delegador="local" servicio="cond:menor">
+							<parametros>
+								<parametro formal="lvalor" actual="_rc_reintentos_il" />
+								<parametro formal="rvalor" constante="3" type="java.lang.Double" />
+								<parametro formal="negado" constante="true" type="java.lang.Boolean" />
+							</parametros>
+						</comando>
+					</condiciones>
+					<parametros ambito="global">
+						<parametro formal="actividad" constante="ActivarSuscriptor" />
+						<parametro formal="_rc_reintentos" constante="0.0" type="java.lang.Double" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>
+				<!-- ROLLBACK CUANDO NO SEA NI CERO NI UN VALOR REINTENTABLE -->
+				<comando delegador="rollbackCrearSuscriptorRTBS" servicio="rollback.suscriptor.rtbs">
+					<condiciones>
+						<comando delegador="local" servicio="cond:in">
+							<parametros ambito="local">
+								<parametro formal="lvalor" actual="_rc_resultado_aprov" />
+								<parametro formal="rvalor" constante="0 200" />
+								<parametro formal="negado" constante="true" type="java.lang.Boolean" />
+							</parametros>
+						</comando>
+					</condiciones>
+					<parametros ambito="global">
+						<parametro formal="actividad" constante="ActivarSuscriptor" />
+						<parametro formal="_rc_reintentos" constante="0.0" type="java.lang.Double" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>
+				<!--  ENVIO DE REGISTRO A ARCHIVO CUANDO LA RESPUESTA SEA DIFERENTE DE CERO Y DEL VALOR REINTENTABLE -->
+				<comando delegador="solicitudRegistroArchivo" servicio="generar.archivo.salida">
+					<condiciones>
+						<comando delegador="local" servicio="cond:in">
+							<parametros ambito="local">
+								<parametro formal="lvalor" actual="_rc_resultado_aprov" />
+								<parametro formal="rvalor" constante="0 200" />
+								<parametro formal="negado" constante="true" type="java.lang.Boolean" />
+							</parametros>
+						</comando>
+					</condiciones>
+					<parametros ambito="global">
+						<parametro formal="error" constante="04" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>
+				<!--  ENVIO DE REGISTRO A ARCHIVO CUANDO SE LLEGUE AL FINAL DE LOS REINTENTOS Y NO SE ENVIE LA SOLICITUD  -->
+				<comando delegador="solicitudRegistroArchivo" servicio="generar.archivo.salida">
+					<condiciones>
+						<comando delegador="local" servicio="cond:in">
+							<parametros ambito="local">
+								<parametro formal="lvalor" actual="_rc_resultado_aprov" />
+								<parametro formal="rvalor" constante="200" />
+							</parametros>
+						</comando>
+						<comando delegador="local" servicio="cond:menor">
+							<parametros>
+								<parametro formal="lvalor" actual="_rc_reintentos_il" />
+								<parametro formal="rvalor" constante="3" type="java.lang.Double" />
+								<parametro formal="negado" constante="true" type="java.lang.Boolean" />
+							</parametros>
+						</comando>
+					</condiciones>
+					<parametros ambito="global">
+						<parametro formal="error" constante="04" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>
+				<comando delegador="registrarEstado" servicio="registrar.estado">
+					<parametros ambito="local">
+						<parametro formal="reportedFrom" constante="HLR_WS" />
+						<parametro formal="ERROR" actual="_rc_resultado_aprov" />
+						<parametro formal="ERROR_MSG" actual="_rc_razon_aprov" />
+						<parametro formal="sistema" constante="rtbs" />
+						<parametro formal="proceso" constante="preactivacion" />
+						<parametro formal="NOMARCHIVO" actual="batchName" />
+						<parametro formal="ID" actual="traceid" />
+						<parametro formal="FECHA" actual="fecha" />
+						<parametro formal="GSM" actual="msisdn" />
+						<parametro formal="IMSI" actual="imsi" />
+						<parametro formal="ICCID" actual="iccid" />
+						<parametro formal="PIN" actual="pin" />
+						<parametro formal="PIN1" actual="pin1" />
+						<parametro formal="PUK" actual="puk" />
+						<parametro formal="PUK2" actual="puk2" />						
+						<parametro formal="profile" actual="profile" />	
+					</parametros>
+				</comando>
+			</comandos>
+		</servicio>
+		
+		<!-- ********************************************************************************************* -->
+
+		<servicio id="rollback.suscriptor.rtbs">
+			<annotation>
+				<documentation>Comandos necesarios para la realizacion del rollback de un suscriptor en RTBS</documentation>
+			</annotation>
+			<comandos>
+				<comando delegador="activarSuscriptorRTBS" servicio="rollback.suscriptor.rtbs">
+					<parametros>
+						<parametro formal="batchName" actual="batchName" />
+						<parametro formal="msisdn" actual="msisdn" />
+						<parametro formal="imsi" actual="imsi" />
+						<parametro formal="iccid" actual="iccid" />
+						<parametro formal="pin" actual="pin" />
+						<parametro formal="puk" actual="puk" />
+						<parametro formal="pin1" actual="pin1" />
+						<parametro formal="puk2" actual="puk2" />
+						<parametro formal="state" constante="Active" />
+						<!--  <parametro formal="actividad" actual="actividad" /> -->
+						<parametro formal="_rc_reintentos" actual="_rc_reintentos" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>
+				<comando delegador="local" servicio="stm:setAll">
+					<parametros ambito="local">
+						<parametro formal="nameList" constante="_rc_resultado_rb _rc_razon_rb" />
+						<parametro formal="rvalor_1" actual="_rc_resultado" />
+						<parametro formal="rvalor_2" actual="_rc_razon" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>
+				<comando delegador="reintentoActivarRTBS" servicio="rollback.suscriptor.rtbs">
+					<condiciones>
+						<comando delegador="local" servicio="cond:in">
+							<parametros ambito="local">
+								<parametro formal="lvalor" actual="_rc_resultado_rb" />
+								<parametro formal="rvalor" constante="300" />
+							</parametros>
+						</comando>
+						<comando delegador="local" servicio="cond:menor">
+							<parametros>
+								<parametro formal="lvalor" actual="_rc_reintentos" />
+								<parametro formal="rvalor" constante="3" type="java.lang.Double" />
+							</parametros>
+						</comando>
+					</condiciones>
+					<parametros ambito="global">
+						<parametro formal="_rc_reintentos" actual="xpath:@_rc_reintentos +1" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>
+				<comando delegador="inactivarSuscriptorRTBSSubmiter" servicio="inactivar.suscriptor.rtbs">
+					<condiciones>
+						<comando delegador="local" servicio="cond:in">
+							<parametros ambito="local">
+								<parametro formal="lvalor" actual="_rc_resultado_rb" />
+								<parametro formal="rvalor" constante="0" />
+							</parametros>
+						</comando>
+					</condiciones>
+					<parametros ambito="global">
+						<parametro formal="_rc_reintentos" constante="0" type="java.lang.Double" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>
+				<comando delegador="registrarEstado" servicio="registrar.estado">
+					<parametros ambito="local">
+						<parametro formal="reportedFrom" constante="CCWS" />
+						<parametro formal="ERROR" actual="_rc_resultado_rb" />
+						<parametro formal="ERROR_MSG" actual="_rc_razon_rb" />
+						<parametro formal="sistema" constante="rtbs" />
+						<parametro formal="proceso" constante="preactivacion" />
+						<parametro formal="NOMARCHIVO" actual="batchName" />
+						<parametro formal="ID" actual="traceid" />
+						<parametro formal="FECHA" actual="fecha" />
+						<parametro formal="GSM" actual="msisdn" />
+						<parametro formal="IMSI" actual="imsi" />
+						<parametro formal="ICCID" actual="iccid" />
+						<parametro formal="PIN" actual="pin" />
+						<parametro formal="PIN1" actual="pin1" />
+						<parametro formal="PUK" actual="puk" />
+						<parametro formal="PUK2" actual="puk2" />
+						<parametro formal="profile" actual="profile" />
+					</parametros>
+				</comando>
+			</comandos>
+		</servicio>
+
+		<servicio id="inactivar.suscriptor.rtbs">
+			<annotation>
+				<documentation>Comandos necesarios para la realizacion del rollback de un suscriptor en RTBS</documentation>
+			</annotation>
+			<comandos>
+				<comando delegador="inactivarSuscriptorRTBS" servicio="inactivar.suscriptor.rtbs">
+					<parametros>
+						<parametro formal="batchName" actual="batchName" />
+						<parametro formal="msisdn" actual="msisdn" />
+						<parametro formal="imsi" actual="imsi" />
+						<parametro formal="iccid" actual="iccid" />
+						<parametro formal="pin" actual="pin" />
+						<parametro formal="puk" actual="puk" />
+						<parametro formal="pin1" actual="pin1" />
+						<parametro formal="puk2" actual="puk2" />
+						<parametro formal="state" constante="Stolen(S2)" />
+						<!--  <parametro formal="actividad" actual="actividad" /> -->
+						<parametro formal="_rc_reintentos" actual="_rc_reintentos" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>
+				<comando delegador="local" servicio="stm:setAll">
+					<parametros ambito="local">
+						<parametro formal="nameList" constante="_rc_resultado_rb _rc_razon_rb" />
+						<parametro formal="rvalor_1" actual="_rc_resultado" />
+						<parametro formal="rvalor_2" actual="_rc_razon" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>
+				<comando delegador="reintentoInactivarRTBS" servicio="inactivar.suscriptor.rtbs">
+					<condiciones>
+						<comando delegador="local" servicio="cond:in">
+							<parametros ambito="local">
+								<parametro formal="lvalor" actual="_rc_resultado_rb" />
+								<parametro formal="rvalor" constante="400" />
+							</parametros>
+						</comando>
+						<comando delegador="local" servicio="cond:menor">
+							<parametros>
+								<parametro formal="lvalor" actual="_rc_reintentos" />
+								<parametro formal="rvalor" constante="3" type="java.lang.Double" />
+							</parametros>
+						</comando>
+					</condiciones>
+					<parametros ambito="global">
+						<parametro formal="_rc_reintentos" actual="xpath:@_rc_reintentos +1" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>
+				<comando delegador="eliminarSuscriptorRTBSSubmiter" servicio="eliminar.suscriptor.rtbs">
+					<condiciones>
+						<comando delegador="local" servicio="cond:in">
+							<parametros ambito="local">
+								<parametro formal="lvalor" actual="_rc_resultado_rb" />
+								<parametro formal="rvalor" constante="0" />
+							</parametros>
+						</comando>
+					</condiciones>
+					<parametros ambito="global">
+						<parametro formal="_rc_reintentos" constante="0" type="java.lang.Double" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>
+				<comando delegador="registrarEstado" servicio="registrar.estado">
+					<parametros ambito="local">
+						<parametro formal="reportedFrom" constante="CCWS" />
+						<parametro formal="ERROR" actual="_rc_resultado_rb" />
+						<parametro formal="ERROR_MSG" actual="_rc_razon_rb" />
+						<parametro formal="sistema" constante="rtbs" />
+						<parametro formal="proceso" constante="preactivacion" />
+						<parametro formal="NOMARCHIVO" actual="batchName" />
+						<parametro formal="ID" actual="traceid" />
+						<parametro formal="FECHA" actual="fecha" />
+						<parametro formal="GSM" actual="msisdn" />
+						<parametro formal="IMSI" actual="imsi" />
+						<parametro formal="ICCID" actual="iccid" />
+						<parametro formal="PIN" actual="pin" />
+						<parametro formal="PIN1" actual="pin1" />
+						<parametro formal="PUK" actual="puk" />
+						<parametro formal="PUK2" actual="puk2" />
+						<parametro formal="profile" actual="profile" />
+					</parametros>
+				</comando>
+			</comandos>
+		</servicio>
+
+		<servicio id="eliminar.suscriptor.rtbs">
+			<annotation>
+				<documentation>Comandos necesarios para la realizacion del rollback de un suscriptor en RTBS</documentation>
+			</annotation>
+			<comandos>
+				<comando delegador="eliminarSuscriptorRTBS" servicio="eliminar.suscriptor.rtbs">
+					<parametros>
+						<parametro formal="batchName" actual="batchName" />
+						<parametro formal="msisdn" actual="msisdn" />
+						<parametro formal="imsi" actual="imsi" />
+						<parametro formal="iccid" actual="iccid" />
+						<parametro formal="pin" actual="pin" />
+						<parametro formal="puk" actual="puk" />
+						<parametro formal="pin1" actual="pin1" />
+						<parametro formal="puk2" actual="puk2" />
+						<!--  <parametro formal="actividad" actual="actividad" /> -->
+						<parametro formal="_rc_reintentos" actual="_rc_reintentos" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>
+				<comando delegador="local" servicio="stm:setAll">
+					<parametros ambito="local">
+						<parametro formal="nameList" constante="_rc_resultado_rb _rc_razon_rb" />
+						<parametro formal="rvalor_1" actual="_rc_resultado" />
+						<parametro formal="rvalor_2" actual="_rc_razon" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>
+				<comando delegador="reintentoEliminarRTBS" servicio="eliminar.suscriptor.rtbs">
+					<condiciones>
+						<comando delegador="local" servicio="cond:in">
+							<parametros ambito="local">
+								<parametro formal="lvalor" actual="_rc_resultado_rb" />
+								<parametro formal="rvalor" constante="500" />
+							</parametros>
+						</comando>
+						<comando delegador="local" servicio="cond:menor">
+							<parametros>
+								<parametro formal="lvalor" actual="_rc_reintentos" />
+								<parametro formal="rvalor" constante="3" type="java.lang.Double" />
+							</parametros>
+						</comando>
+					</condiciones>
+					<parametros ambito="global">
+						<parametro formal="_rc_reintentos" actual="xpath:@_rc_reintentos +1" />
+					</parametros>
+					<retorno ignorar="y" codes="*" />
+				</comando>
+				<comando delegador="registrarEstado" servicio="registrar.estado">
+					<parametros ambito="local">
+						<parametro formal="reportedFrom" constante="CCWS" />
+						<parametro formal="ERROR" actual="_rc_resultado_rb" />
+						<parametro formal="ERROR_MSG" actual="_rc_razon_rb" />
+						<parametro formal="sistema" constante="rtbs" />
+						<parametro formal="proceso" constante="preactivacion" />
+						<parametro formal="NOMARCHIVO" actual="batchName" />
+						<parametro formal="ID" actual="traceid" />
+						<parametro formal="FECHA" actual="fecha" />
+						<parametro formal="GSM" actual="msisdn" />
+						<parametro formal="IMSI" actual="imsi" />
+						<parametro formal="ICCID" actual="iccid" />
+						<parametro formal="PIN" actual="pin" />
+						<parametro formal="PIN1" actual="pin1" />
+						<parametro formal="PUK" actual="puk" />
+						<parametro formal="PUK2" actual="puk2" />
+						<parametro formal="profile" actual="profile" />
+					</parametros>
+				</comando>
+			</comandos>
+		</servicio>
+
+		<!-- ********************************************************************************************* -->
+
+		<servicio id="generar.archivo.salida">
+			<annotation>
+				<documentation>Servicio de generación de archivo de salida</documentation>
+			</annotation>
+			<comandos>
+				<comando delegador="generarRegistroArchivo" servicio="generar.archivo.salida">
+					<parametros ambito="global"></parametros>
+				</comando>
+			</comandos>
+		</servicio>
+				
+	</servicios>
+
+	<delegadores>
+		<delegador id="local" constructor="class" nombre="ve.com.digitel.premasivas.delegator.LocalClassDelegator">
+			<servicioDelegado id="cond:in" nombre="ve.com.digitel.premasivas.filtros.Incluido" />
+			<servicioDelegado id="cond:menor" nombre="ve.com.digitel.premasivas.filtros.Menor" />
+			<servicioDelegado id="stm:set" nombre="ve.com.digitel.premasivas.command.Set" />
+			<servicioDelegado id="stm:setAll" nombre="ve.com.digitel.premasivas.command.SetAll" />
+		</delegador>
+
+		<delegador id="crearSuscriptorRTBS" constructor="class"
+			nombre="ve.com.digitel.premasivas.delegator.CreateSubscriberRTBSDelegator">
+			<initParams>
+				<initParam>
+					<name>endPointURL</name>
+					<value>application.premasivas.rtbs.endpoint</value>
+				</initParam>
+				<initParam>
+					<name>SOAPActionValue</name>
+					<value>application.premasivas.rtbs.subscriber.create</value>
+				</initParam>
+				<initParam>
+					<name>user</name>
+					<value>application.premasivas.rtbs.user</value>
+				</initParam>
+				<initParam>
+					<name>password</name>
+					<value>application.premasivas.rtbs.password</value>
+				</initParam>				
+				<initParam>
+					<name>maxConnetionPerHost</name>
+					<value>application.premasivas.httpclient.maxconnetionPerHost</value>
+				</initParam>
+				<initParam>
+					<name>maxTotalConnections</name>
+					<value>application.premasivas.httpclient.maxTotalConnections</value>
+				</initParam>				
+				<initParam>
+					<name>timeOutRTBS</name>
+					<value>application.premasivas.rtbs.timeout</value>
+				</initParam>
+			</initParams>
+		</delegador>
+
+		<delegador id="reintentoCrearSuscriptorRTBS" constructor="class"
+			nombre="ve.com.digitel.premasivas.delegator.RetryQueueSubmiterDelegator">
+			<initParams>
+				<initParam>
+					<name>queue</name>
+					<value>application.premasivas.reintento.queue</value>
+				</initParam>
+				<initParam>
+					<name>factory</name>
+					<value>application.premasivas.reintento.factory</value>
+				</initParam>
+				<initParam>
+					<name>context</name>
+					<value>application.premasivas.initial_context_factory</value>
+				</initParam>
+				<initParam>
+					<name>providerURL</name>
+					<value>application.premasivas.provider_url</value>
+				</initParam>
+			</initParams>
+		</delegador>
+				
+		<delegador id="registrarEstado" constructor="class"
+			nombre="ve.com.digitel.premasivas.delegator.StateQueueSubmiterDelegator">
+			<initParams>
+				<initParam>
+					<name>factory</name>
+					<value>application.premasivas.control.factory</value>
+				</initParam>
+				<initParam>
+					<name>queue</name>
+					<value>application.premasivas.control.queue</value>
+				</initParam>
+				<initParam>
+					<name>context</name>
+					<value>application.premasivas.initial_context_factory</value>
+				</initParam>
+				<initParam>
+					<name>providerURL</name>
+					<value>application.control.service.provider_url</value>
+				</initParam>
+			</initParams>
+		</delegador>
+		
+		<delegador id="solicitudAprovisionamientoHLR" constructor="class"
+			nombre="ve.com.digitel.premasivas.delegator.SolicitudQueueSubmiterDelegator">
+			<initParams>
+				<initParam>
+					<name>factory</name>
+					<value>application.premasivas.solicitud.factory</value>
+				</initParam>
+				<initParam>
+					<name>queue</name>
+					<value>application.premasivas.solicitud.queue</value>
+				</initParam>
+				<initParam>
+					<name>context</name>
+					<value>application.premasivas.initial_context_factory</value>
+				</initParam>
+				<initParam>
+					<name>providerURL</name>
+					<value>application.premasivas.provider_url</value>
+				</initParam>
+			</initParams>
+		</delegador>
+
+		<delegador id="aprovisionarSuscriptorHLR" constructor="class"
+			nombre="ve.com.digitel.premasivas.delegator.AprovisionarSuscriptorHLRDelegator">
+			<initParams>
+				<initParam>
+					<name>endPointURL</name>
+					<value>application.premasivas.hlr.WS_URL</value>
+				</initParam>
+				<initParam>
+					<name>SOAPActionValue</name>
+					<value>application.premasivas.hlr.SoapAction</value>
+				</initParam>
+				<initParam>
+					<name>maxConnetionPerHost</name>
+					<value>application.premasivas.httpclient.maxconnetionPerHost</value>
+				</initParam>
+				<initParam>
+					<name>maxTotalConnections</name>
+					<value>application.premasivas.httpclient.maxTotalConnections</value>
+				</initParam>
+				<initParam>
+					<name>NE_TYPE</name>
+					<value>application.premasivas.hlr.NE_TYPE</value>
+				</initParam>
+				<initParam>
+					<name>REQ_USER</name>
+					<value>application.premasivas.hlr.REQ_USER</value>
+				</initParam>
+				<initParam>
+					<name>REQ_TYPE</name>
+					<value>application.premasivas.hlr.REQ_TYPE</value>
+				</initParam>
+				<initParam>
+					<name>WS_URL</name>
+					<value>application.premasivas.hlr.WS_URL</value>
+				</initParam>
+				<initParam>
+					<name>TIME_OUT</name>
+					<value>application.premasivas.hlr.timeout</value>
+				</initParam>
+				<initParam>
+					<name>IL_USER</name>
+					<value>application.premasivas.hlr.user</value>
+				</initParam>
+				<initParam>
+					<name>IL_PSW</name>
+					<value>application.premasivas.hlr.password</value>
+				</initParam>
+				<initParam>
+					<name>REPLY_TO_ADDRESS</name>
+					<value>application.premasivas.hlr.REPLY_TO_ADDRESS</value>
+				</initParam>
+				<initParam>
+					<name>REQ_OBJ</name>
+					<value>application.premasivas.hlr.REQ_OBJ</value>
+				</initParam>
+				<initParam>
+					<name>BASIC1</name>
+					<value>application.premasivas.hlr.BASIC1</value>
+				</initParam>				
+				<initParam>
+					<name>timeOutHLR</name>
+					<value>application.premasivas.hlr.timeout</value>
+				</initParam>
+				<!--Modificaciones 21/06/2013 agregado de configuraciones para LTE -->
+				  <initParam>
+					<name>BSTINST</name>
+					<value>application.premasivas.hlr.BSTINST</value>
+				</initParam>
+			       <initParam>
+					<name>ORDER_TYPE</name>
+					<value>application.premasivas.hlr.ORDER_TYPE</value>
+				</initParam>
+			</initParams>
+		</delegador>
+
+		<delegador id="reintentoAprovisionarSuscriptorHLR" constructor="class"
+			nombre="ve.com.digitel.premasivas.delegator.RetryHLRQueueSubmiterDelegator">
+			<initParams>
+				<initParam>
+					<name>queue</name>
+					<value>application.premasivas.reintento.queue</value>
+				</initParam>
+				<initParam>
+					<name>factory</name>
+					<value>application.premasivas.reintento.factory</value>
+				</initParam>
+				<initParam>
+					<name>context</name>
+					<value>application.premasivas.initial_context_factory</value>
+				</initParam>
+				<initParam>
+					<name>providerURL</name>
+					<value>application.premasivas.provider_url</value>
+				</initParam>
+			</initParams>
+		</delegador>
+		
+		<delegador id="rollbackCrearSuscriptorRTBS" constructor="class"
+			nombre="ve.com.digitel.premasivas.delegator.RollbackRTBSSubmiterDelegator">
+			<initParams>
+				<initParam>
+					<name>factory</name>
+					<value>application.premasivas.solicitud.factory</value>
+				</initParam>
+				<initParam>
+					<name>queue</name>
+					<value>application.premasivas.solicitud.queue</value>
+				</initParam>
+				<initParam>
+					<name>context</name>
+					<value>application.premasivas.initial_context_factory</value>
+				</initParam>
+				<initParam>
+					<name>providerURL</name>
+					<value>application.premasivas.provider_url</value>
+				</initParam>
+			</initParams>
+		</delegador>
+		
+		<delegador id="activarSuscriptorRTBS" constructor="class"
+			nombre="ve.com.digitel.premasivas.delegator.ActiveSubscriberRTBSDelegator">
+			<initParams>
+				<initParam>
+					<name>endPointURL</name>
+					<value>application.premasivas.rtbs.endpoint</value>
+				</initParam>
+				<initParam>
+					<name>SOAPActionValue</name>
+					<value>application.premasivas.rtbs.subscriber.active</value>
+				</initParam>
+				<initParam>
+					<name>user</name>
+					<value>application.premasivas.rtbs.user</value>
+				</initParam>
+				<initParam>
+					<name>password</name>
+					<value>application.premasivas.rtbs.password</value>
+				</initParam>
+				<initParam>
+					<name>maxConnetionPerHost</name>
+					<value>application.premasivas.httpclient.maxconnetionPerHost</value>
+				</initParam>
+				<initParam>
+					<name>maxTotalConnections</name>
+					<value>application.premasivas.httpclient.maxTotalConnections</value>
+				</initParam>
+				<initParam>
+					<name>timeOutRTBS</name>
+					<value>application.premasivas.rtbs.timeout</value>
+				</initParam>
+			</initParams>
+		</delegador>
+		
+		<delegador id="inactivarSuscriptorRTBS" constructor="class"
+			nombre="ve.com.digitel.premasivas.delegator.InactiveSubscriberRTBSDelegator">
+			<initParams>
+				<initParam>
+					<name>endPointURL</name>
+					<value>application.premasivas.rtbs.endpoint</value>
+				</initParam>
+				<initParam>
+					<name>SOAPActionValue</name>
+					<value>application.premasivas.rtbs.subscriber.inactive</value>
+				</initParam>
+				<initParam>
+					<name>user</name>
+					<value>application.premasivas.rtbs.user</value>
+				</initParam>
+				<initParam>
+					<name>password</name>
+					<value>application.premasivas.rtbs.password</value>
+				</initParam>
+				<initParam>
+					<name>maxConnetionPerHost</name>
+					<value>application.premasivas.httpclient.maxconnetionPerHost</value>
+				</initParam>
+				<initParam>
+					<name>maxTotalConnections</name>
+					<value>application.premasivas.httpclient.maxTotalConnections</value>
+				</initParam>
+				<initParam>
+					<name>timeOutRTBS</name>
+					<value>application.premasivas.rtbs.timeout</value>
+				</initParam>
+			</initParams>
+		</delegador>
+		
+		<delegador id="eliminarSuscriptorRTBS" constructor="class"
+			nombre="ve.com.digitel.premasivas.delegator.DeleteSubscriberRTBSDelegator">
+			<initParams>
+				<initParam>
+					<name>endPointURL</name>
+					<value>application.premasivas.rtbs.endpoint</value>
+				</initParam>
+				<initParam>
+					<name>SOAPActionValue</name>
+					<value>application.premasivas.rtbs.subscriber.delete</value>
+				</initParam>
+				<initParam>
+					<name>user</name>
+					<value>application.premasivas.rtbs.user</value>
+				</initParam>
+				<initParam>
+					<name>password</name>
+					<value>application.premasivas.rtbs.password</value>
+				</initParam>
+				<initParam>
+					<name>maxConnetionPerHost</name>
+					<value>application.premasivas.httpclient.maxconnetionPerHost</value>
+				</initParam>
+				<initParam>
+					<name>maxTotalConnections</name>
+					<value>application.premasivas.httpclient.maxTotalConnections</value>
+				</initParam>
+				<initParam>
+					<name>timeOutRTBS</name>
+					<value>application.premasivas.rtbs.timeout</value>
+				</initParam>
+			</initParams>
+		</delegador>
+		
+		<delegador id="respaldarRequestService" constructor="class"
+			nombre="ve.com.digitel.premasivas.delegator.RespaldarDBRequestServiceDelegator">
+			<initParams>
+				<initParam>
+					<name>providerURL</name>
+					<value>application.premasivas.provider_url</value>
+				</initParam>
+				<initParam>
+					<name>context</name>
+					<value>application.premasivas.initial_context_factory</value>
+				</initParam>
+				<initParam>
+					<name>dataSource</name>
+					<value>application.premasivas.respaldo.request.dataSource</value>
+				</initParam>
+				<initParam>
+					<name>queryInsert</name>
+					<value>application.premasivas.respaldo.request.insert</value>
+				</initParam>
+
+			</initParams>
+		</delegador>
+
+		<delegador id="solicitudRegistroArchivo" constructor="class"
+			nombre="ve.com.digitel.premasivas.delegator.SolicitudArchivoSubmiterDelegator">
+			<initParams>
+				<initParam>
+					<name>queue</name>
+					<value>application.premasivas.solicitud.queue</value>
+				</initParam>
+				<initParam>
+					<name>factory</name>
+					<value>application.premasivas.solicitud.factory</value>
+				</initParam>
+				<initParam>
+					<name>context</name>
+					<value>application.premasivas.initial_context_factory</value>
+				</initParam>
+				<initParam>
+					<name>providerURL</name>
+					<value>application.premasivas.provider_url</value>
+				</initParam>
+			</initParams>
+		</delegador>
+		
+		<delegador id="generarRegistroArchivo" constructor="class"
+			nombre="ve.com.digitel.premasivas.delegator.FileWriterDelegator">
+			<initParams>
+				<initParam>
+					<name>directory</name>
+					<value>application.premasivas.outbox</value>
+				</initParam>
+				<initParam>
+					<name>inboxDirectory</name>
+					<value>application.premasivas.inbox</value>
+				</initParam>
+				<initParam>
+					<name>inprocessDirectory</name>
+					<value>application.premasivas.inprocess</value>
+				</initParam>
+				<initParam>
+					<name>processDirectory</name>
+					<value>application.premasivas.process</value>
+				</initParam>
+				<initParam>
+					<name>ivrDirectory</name>
+					<value>application.premasivas.temp</value>
+				</initParam>
+				<initParam>
+					<name>providerURL</name>
+					<value>application.premasivas.provider_url</value>
+				</initParam>
+				<initParam>
+					<name>context</name>
+					<value>application.premasivas.initial_context_factory</value>
+				</initParam>
+				<initParam>
+					<name>dataSource</name>
+					<value>application.premasivas.respaldo.request.dataSource</value>
+				</initParam>
+				<initParam>
+					<name>queryDelete</name>
+					<value>application.premasivas.respaldo.request.delete.all</value>
+				</initParam>
+			</initParams>
+		</delegador>
+
+		<delegador id="reintentoActivarRTBS" constructor="class"
+			nombre="ve.com.digitel.premasivas.delegator.ReintentoActivarRTBSSubmiterDelegator">
+			<initParams>
+				<initParam>
+					<name>queue</name>
+					<value>application.premasivas.reintento.queue</value>
+				</initParam>
+				<initParam>
+					<name>factory</name>
+					<value>application.premasivas.reintento.factory</value>
+				</initParam>
+				<initParam>
+					<name>context</name>
+					<value>application.premasivas.initial_context_factory</value>
+				</initParam>
+				<initParam>
+					<name>providerURL</name>
+					<value>application.premasivas.provider_url</value>
+				</initParam>
+			</initParams>
+		</delegador>
+
+		<delegador id="reintentoInactivarRTBS" constructor="class"
+			nombre="ve.com.digitel.premasivas.delegator.ReintentoInactivarRTBSSubmiterDelegator">
+			<initParams>
+				<initParam>
+					<name>queue</name>
+					<value>application.premasivas.reintento.queue</value>
+				</initParam>
+				<initParam>
+					<name>factory</name>
+					<value>application.premasivas.reintento.factory</value>
+				</initParam>
+				<initParam>
+					<name>context</name>
+					<value>application.premasivas.initial_context_factory</value>
+				</initParam>
+				<initParam>
+					<name>providerURL</name>
+					<value>application.premasivas.provider_url</value>
+				</initParam>
+			</initParams>
+		</delegador>
+
+		<delegador id="reintentoEliminarRTBS" constructor="class"
+			nombre="ve.com.digitel.premasivas.delegator.ReintentoEliminarRTBSSubmiterDelegator">
+			<initParams>
+				<initParam>
+					<name>queue</name>
+					<value>application.premasivas.reintento.queue</value>
+				</initParam>
+				<initParam>
+					<name>factory</name>
+					<value>application.premasivas.reintento.factory</value>
+				</initParam>
+				<initParam>
+					<name>context</name>
+					<value>application.premasivas.initial_context_factory</value>
+				</initParam>
+				<initParam>
+					<name>providerURL</name>
+					<value>application.premasivas.provider_url</value>
+				</initParam>
+			</initParams>
+		</delegador>
+
+		<delegador id="inactivarSuscriptorRTBSSubmiter" constructor="class"
+			nombre="ve.com.digitel.premasivas.delegator.InactivarRTBSSubmiterDelegator">
+			<initParams>
+				<initParam>
+					<name>factory</name>
+					<value>application.premasivas.solicitud.factory</value>
+				</initParam>
+				<initParam>
+					<name>queue</name>
+					<value>application.premasivas.solicitud.queue</value>
+				</initParam>
+				<initParam>
+					<name>context</name>
+					<value>application.premasivas.initial_context_factory</value>
+				</initParam>
+				<initParam>
+					<name>providerURL</name>
+					<value>application.premasivas.provider_url</value>
+				</initParam>
+			</initParams>
+		</delegador>
+
+		<delegador id="eliminarSuscriptorRTBSSubmiter" constructor="class"
+			nombre="ve.com.digitel.premasivas.delegator.EliminarRTBSSubmiterDelegator">
+			<initParams>
+				<initParam>
+					<name>factory</name>
+					<value>application.premasivas.solicitud.factory</value>
+				</initParam>
+				<initParam>
+					<name>queue</name>
+					<value>application.premasivas.solicitud.queue</value>
+				</initParam>
+				<initParam>
+					<name>context</name>
+					<value>application.premasivas.initial_context_factory</value>
+				</initParam>
+				<initParam>
+					<name>providerURL</name>
+					<value>application.premasivas.provider_url</value>
+				</initParam>
+			</initParams>
+		</delegador>
+				
+		<delegador id="registrarSuscriptorIVR" constructor="class"
+			nombre="ve.com.digitel.premasivas.delegator.RegistrarSuscriptorIVRDelegator">
+			<initParams>
+				<initParam>
+					<name>providerURL</name>
+					<value>application.premasivas.provider_url</value>
+				</initParam>
+				<initParam>
+					<name>context</name>
+					<value>
+						application.premasivas.initial_context_factory
+					</value>
+				</initParam>
+				<initParam>
+					<name>dataSource</name>
+					<value>
+						application.premasivas.registro.ivr.dataSource
+					</value>
+				</initParam>
+			</initParams>
+		</delegador>
+		
+		<delegador id="ArchivoErrorIVR" constructor="class"
+			nombre="ve.com.digitel.premasivas.delegator.GenerarArchivoIVRDelegator">
+			<initParams>
+				<initParam>
+					<name>ivrDirectory</name>
+					<value>application.premasivas.temp</value>
+				</initParam>
+			</initParams>
+		</delegador>
+		
+		<delegador id="cargarUsuario3gAutenticador" constructor="class"
+			nombre="ve.com.digitel.premasivas.delegator.CargarUsuario3gAutenticadorDelegator">
+			<initParams>
+				<initParam>
+					<name>providerURL</name>
+					<value>application.premasivas.provider_url</value>
+				</initParam>
+				<initParam>
+					<name>context</name>
+					<value>
+						application.premasivas.initial_context_factory
+					</value>
+				</initParam>
+				<initParam>
+					<name>dataSource</name>
+					<value>
+						application.premasivas.carga.usuario3g.dataSource
+					</value>
+				</initParam>	
+				<initParam>
+					<name>url</name>
+					<value>
+						application.premasivas.cu3g.url
+					</value>
+				</initParam>
+				<initParam>
+					<name>returnURL</name>
+					<value>
+						application.premasivas.cu3g.returnURL
+					</value>
+				</initParam>				
+				<initParam>
+					<name>oldpass</name>
+					<value>
+						application.premasivas.cu3g.oldpass
+					</value>
+				</initParam>
+				<initParam>
+					<name>posicionPass</name>
+					<value>
+						application.premasivas.cu3g.posicionPass
+					</value>
+				</initParam>				
+				<initParam>
+					<name>tipoUsuario</name>
+					<value>
+						application.premasivas.cu3g.tipo.usuario
+					</value>
+				</initParam>
+			</initParams>
+		</delegador>
+		
+		<delegador id="ArchivoErrorAutenticador" constructor="class"
+			nombre="ve.com.digitel.premasivas.delegator.GenerarArchivoAutenticadorDelegator">
+			<initParams>
+				<initParam>
+					<name>Directory</name>
+					<value>application.premasivas.temp</value>
+				</initParam>
+			</initParams>
+		</delegador>
+		
+	</delegadores>
+</config>

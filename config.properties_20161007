@@ -1,0 +1,240 @@
+# Archivo de configuracion para la aplicacion de Activaciones Masivas - Prepago
+
+# Servidor Weblogic
+application.premasivas.initial_context_factory=weblogic.jndi.WLInitialContextFactory
+
+# IP y Puerto servidor weblogic
+#application.premasivas.provider_url=t3://10.27.31.189:7010
+application.premasivas.provider_url=t3://CFGLOBD05:8601
+
+# JNDI cola de solicitudes
+application.premasivas.solicitud.queue=premasivas.jms.solicitud.queue
+
+# JNDI connection factory de solicitudes
+application.premasivas.solicitud.factory=premasivas.jms.solicitud.factory
+
+#
+application.premasivas.reintento.factory=premasivas.jms.reintento.factory
+
+#
+application.premasivas.reintento.queue=premasivas.jms.reintento.queue
+
+# IP y Puerto servidor weblogic donde se encuentra el servicio de registro de estado
+#application.control.service.provider_url=t3://10.27.31.189:7010
+application.control.service.provider_url=t3://CFGLOBD05:8601
+
+#
+application.premasivas.control.factory=register.element.service.jms.factory
+
+#
+application.premasivas.control.queue=res.jms.solicitud.queue
+
+# JNDI cola de solicitudes fase 2
+application.premasivas.fase2.solicitud.queue=premasivas.fase2.jms.solicitud.queue
+
+# JNDI connection factory de solicitudes fase 2
+application.premasivas.fase2.solicitud.factory=premasivas.fase2.jms.solicitud.factory
+
+#
+application.premasivas.nombre.archivo=.*\\.OUT
+
+#
+application.premasivas.nombre.archivo.rtbs=.*\\.OUT\\.RTBS
+
+#
+application.premasivas.extension.archivo.rtbs=.RTBS
+
+# Posibles valores de campo <IND_ZONA_FRANCA> en el encabezado del lote
+# El primer valor indica que es Tierra Firme y el segundo que es Zona Franca
+application.premasivas.indicador.zonafranca=0;1
+
+# Directorio que contiene los archivos a ser procesados
+#application.premasivas.inbox=/integrationII/bea/user_projects/applications/PreMasivas/inbox/
+application.premasivas.inbox=/appsintdev/digitel/applications/PreMasivas/inbox/
+
+# Directorio que contiene los archivos en procesamiento
+#application.premasivas.inprocess=/integrationII/bea/user_projects/applications/PreMasivas/inprocess/
+application.premasivas.inprocess=/appsintdev/digitel/applications/PreMasivas/inprocess/
+
+# Directorio que contiene los archivos procesados
+#application.premasivas.process=/integrationII/bea/user_projects/applications/PreMasivas/process/
+application.premasivas.process=/appsintdev/digitel/applications/PreMasivas/process/
+
+# Directorio que contiene archivos de entrada con error
+#application.premasivas.error=/integrationII/bea/user_projects/applications/PreMasivas/error/
+application.premasivas.error=/appsintdev/digitel/applications/PreMasivas/error/
+
+# Directorio que contiene los archivos de salida
+#application.premasivas.outbox=/integrationII/bea/user_projects/applications/PreMasivas/outbox/
+application.premasivas.outbox=/appsintdev/digitel/applications/PreMasivas/outbox/
+
+# Directorio que contiene archivos de error de IVR
+#application.premasivas.temp=/integrationII/bea/user_projects/applications/PreMasivas/temp/
+application.premasivas.temp=/appsintdev/digitel/applications/PreMasivas/temp/
+
+# Cantidad maxima de archivos a procesar paralelamente
+application.premasivas.archivos.procesar=1
+
+# Tipos de lçnea posibles en el campo <TIPO> del encabezado del archivo
+#application.premasivas.tipos.lineas=BASICA;MOVIL;BAM;PUBLICA;PUBLICASOCIAL;
+application.premasivas.tipos.lineas=BASICA;MOVIL;BAM;PUBLICA;PUBLICASOCIAL;BASICA_LTE;MOVIL_LTE;BAM_LTE;
+
+# Planes RTBS Zona Franca 
+#application.premasivas.planes.lineas.zf=Pre Activo Fija ZF;Pre Activo Movil ZF;Pre Activo BAM ZF;Telefonia Publica;Social
+application.premasivas.planes.lineas.zf=Pre Activo Fija ZF;Pre Activo Movil ZF;Pre Activo BAM ZF;Telefonia Publica;Social;Pre Activo Fija ZF;Pre Activo Movil ZF;Pre Activo BAM ZF
+
+# Planes RTBS Tierra Firme
+#application.premasivas.planes.lineas.tf=Pre Activo Fija;Pre Activo Movil;Pre Activo BAM;Telefonia Publica;Social
+application.premasivas.planes.lineas.tf=Pre Activo Fija;Pre Activo Movil;Pre Activo BAM;Telefonia Publica;Social;Pre Activo Fija;Pre Activo Movil;Pre Activo BAM
+
+# Perfiles HLR Zona Franca
+#application.premasivas.perfiles.lineas.zf=91;90;94;95;95
+
+#application.premasivas.perfiles.lineas.zf=09;07;08;06;06;03;01;02
+
+application.premasivas.perfiles.lineas.zf=02;01;05;06;06;09;07;08
+
+# Perfiles HLR Tierra Firme
+#application.premasivas.perfiles.lineas.tf=91;90;94;95;95
+
+#application.premasivas.perfiles.lineas.tf=09;07;08;06;06;03;01;02
+
+application.premasivas.perfiles.lineas.tf=02;01;05;06;06;09;07;08
+
+# Expresion regular para determinar zona franca
+#application.premasivas.file.zf=NVAESPARTA
+
+# Plan Basica Zona Franca
+#application.premasivas.rtbs.basica.zf.plan=Hogar 412 ZF
+
+# Plan Movil Zona Franca
+#application.premasivas.rtbs.movil.zf.plan=Radicall Plus ZF
+
+# Plan Basica Tierra Firme
+#application.premasivas.rtbs.basica.tf.plan=Hogar 412
+
+# Plan Movil Tierra Firme
+#application.premasivas.rtbs.movil.tf.plan=Radicall Plus
+
+#application.premasivas.rtbs.endpoint=http://CCWSTEST.digitelcorp.com.ve/ccws/ccws.asmx
+application.premasivas.rtbs.endpoint=http://10.192.127.100:7053/FachadaPreactTelefoniaPublicaWAR/Service?WSDL
+# 
+application.premasivas.rtbs.user=weblogic
+application.premasivas.rtbs.password=digitel412
+
+# 
+application.premasivas.rtbs.subscriber.create="http://comverse-in.com/prepaid/ccws/CreateSubscriber"
+# 
+application.premasivas.rtbs.subscriber.active="http://comverse-in.com/prepaid/ccws/ModifySubscriber"
+# 
+application.premasivas.rtbs.subscriber.inactive="http://comverse-in.com/prepaid/ccws/ModifySubscriber"
+#
+application.premasivas.rtbs.subscriber.delete="http://comverse-in.com/prepaid/ccws/DeleteSubscriber"
+
+
+#Jimmy el dÌa 11-Jun-13 solicito la inclusiÛn de la IP de un F5 para el ir al ILink
+#application.premasivas.hlr.WS_URL=http://10.192.13.28:44280/axis/services/SOAPApi
+application.premasivas.hlr.WS_URL=http://cfomd03:44280/axis/services/SOAPApi
+
+#
+application.premasivas.hlr.SoapAction=
+
+#
+#application.premasivas.hlr.REPLY_TO_ADDRESS=http://10.27.31.189:7010/PreMasivasP2ILWeb/ResponseILService
+#application.premasivas.hlr.REPLY_TO_ADDRESS=http://CFGLOBD05:8601/PreMasivasP2ILWeb/ResponseILService
+application.premasivas.hlr.REPLY_TO_ADDRESS=http://cfglobd05:8601/PreMasivasP2ILWeb/ResponseILService
+
+#
+application.premasivas.hlr.NE_TYPE=HLR
+
+#
+application.premasivas.hlr.REQ_USER=RTBS
+
+#
+application.premasivas.hlr.REQ_TYPE=1
+
+#
+application.premasivas.hlr.REQ_OBJ=1
+
+#
+application.premasivas.hlr.BASIC1=T11
+
+#
+application.premasivas.hlr.CATEGORY=1
+
+# Profile Basica zona franca
+#application.premasivas.hlr.basica.zf.profile=91
+
+# Profile Basica tierra firme
+#application.premasivas.hlr.basica.tf.profile=91
+
+# Profile Movil zona franca
+#application.premasivas.hlr.movil.zf.profile=90
+
+# Profile Movil tierra firme
+#application.premasivas.hlr.movil.tf.profile=90
+
+# 
+#application.premasivas.hlr.user=RTBS
+
+application.premasivas.hlr.user=BUS412PRE
+application.premasivas.hlr.password=digitel412
+
+#Datos carga usuario 3G
+#application.premasivas.cu3g.url=http://cswsmash01:9080
+application.premasivas.cu3g.url=http://cswebasd01.corp.digitel.com.ve:7001
+
+#application.premasivas.cu3g.returnURL=http://www.digitel.com.ve
+application.premasivas.cu3g.returnURL=http://200.71.240.43
+
+application.premasivas.cu3g.oldpass=1234
+
+application.premasivas.cu3g.posicionPass=16-19
+
+application.premasivas.cu3g.tipo.usuario=PREP
+#Datos carga usuario 3G
+
+#
+application.premasivas.httpclient.maxconnetionPerHost=25
+
+#
+application.premasivas.httpclient.maxTotalConnections=25
+
+#
+#application.premasivas.respaldo.request.insert=INSERT INTO CRTLPREMAS ( ID, FECHA, NOMARCHIVO, GSM, IMSI, ICCID, PIN, PIN1, PUK, PUK2, ERROR, ERROR_MSG, PROFILE ) VALUES (?,?,?,?,?,?,?,?,?,?,'TMP',?,?)
+application.premasivas.respaldo.request.insert=INSERT INTO CONFIG1.CRTLPREMAS ( ID, FECHA, NOMARCHIVO, GSM, IMSI, ICCID, PIN, PIN1, PUK, PUK2, ERROR, PROFILE, STATUS_IL, REINTENTOS_IL) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+
+#
+#application.premasivas.respaldo.request.select=SELECT * FROM CRTLPREMAS WHERE NOMARCHIVO = ? AND GSM = ? AND ERROR = 'TMP' AND ROWNUM <= 1
+application.premasivas.respaldo.request.select=SELECT * FROM CONFIG1.CRTLPREMAS WHERE NOMARCHIVO = ? AND GSM = ? AND ROWNUM <= 1
+
+#
+#application.premasivas.respaldo.request.delete=DELETE FROM CRTLPREMAS WHERE NOMARCHIVO = ? AND ERROR = 'TMP'
+application.premasivas.respaldo.request.delete=DELETE FROM CONFIG1.CRTLPREMAS WHERE NOMARCHIVO = ? AND GSM = ?
+
+#
+application.premasivas.respaldo.request.delete.all=DELETE FROM CONFIG1.CRTLPREMAS WHERE NOMARCHIVO = ?
+
+#
+#application.premasivas.respaldo.request.dataSource=jdbc.datasource.respaldo
+application.premasivas.respaldo.request.dataSource=jdbc.datasource.res
+
+#sp_IVRUpdate(?, ?, ?, ?)
+application.premasivas.registro.ivr.dataSource=jdbc.datasource.premasivas.ivr
+
+#SP_CREARUSUARIO3G(?,?)
+application.premasivas.carga.usuario3g.dataSource=jdbc.datasource.premasivas.cu3g
+
+#
+application.premasivas.rtbs.timeout=15000
+
+#
+application.premasivas.hlr.timeout=15000
+
+#
+#application.premasivas.nombre.archivo=.*._.*.OUT
+
+application.premasivas.hlr.BSTINST=PRE
+
+application.premasivas.hlr.ORDER_TYPE=CREATE_SUBSCRIBER
+

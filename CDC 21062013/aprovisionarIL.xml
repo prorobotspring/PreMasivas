@@ -1,0 +1,26 @@
+<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope"
+	xmlns:wsa="http://www.w3.org/2005/08/addressing"
+	xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
+	<soap:Header>
+		<wsse:UsernameToken>
+			<wsse:Username>${username}</wsse:Username>
+			<wsse:Password>${password}</wsse:Password>
+		</wsse:UsernameToken>
+		<wsa:Action>${wsURL}</wsa:Action>
+		<wsa:MessageID>${message}</wsa:MessageID>
+		<wsa:ReplyTo>
+			<wsa:Address>${replyToAddress}</wsa:Address>
+		</wsa:ReplyTo>
+	</soap:Header>
+	<soap:Body>
+		<REQUEST xmlns="http://www.comptel.com/ilink/api/soap/2005/09"
+			NE_TYPE="${neType}" REQ_USER="${reqUser}" REQ_TYPE="${reqType}">
+			<Parameter name="BSTINST" value="${bstinst}" />
+			<Parameter name="ORDER_TYPE" value="${ordertype}" />
+			<Parameter name="IMSI1" value="${imsi}" />
+			<Parameter name="MSISDN1" value="58${msisdn:1}" />
+			<Parameter name="ORDER_NO" value="${order}" />
+			<Parameter name="SUB_TYPE" value="${profile}" />
+		</REQUEST>
+	</soap:Body>
+</soap:Envelope>

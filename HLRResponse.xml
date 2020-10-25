@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://www.w3.org/2003/05/soap-envelope">
+	<soapenv:Body>
+		<RESPONSE_ACK xmlns="http://www.comptel.com/ilink/api/soap/2005/09" 
+		ACK_STATUS="${code}"
+		ACK_SMESSAGE="${msg}"/>
+	</soapenv:Body>
+</soapenv:Envelope>

@@ -1,0 +1,24 @@
+[2018Aug08 21:53:50,775][INFO ][1533774651723][configurarLogger BSSIntLogger.java:67][APLICACION: PreMasivas - VERSION: 1.0]
+[2018Aug08 21:53:50,777][INFO ][1533774651723][configurarLogger BSSIntLogger.java:69][DESCRIPCION: Servicios de Integracion - PreActivaciones Masivas Lineas Prepago]
+[2018Aug08 21:53:50,787][DEBUG][1533774651723][compileCmd NameSustitutionCmdAdapter.java:50][Iniciando proceso de compilacion de comando: <?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://www.w3.org/2003/05/soap-envelope">
+	<soapenv:Body>
+		<RESPONSE_ACK xmlns="http://www.comptel.com/ilink/api/soap/2005/09" 
+		ACK_STATUS="${code}"
+		ACK_SMESSAGE="${msg}"/>
+	</soapenv:Body>
+</soapenv:Envelope>
+]
+[2018Aug08 21:53:50,789][DEBUG][1533774651723][compileCmd NameSustitutionCmdAdapter.java:87][Componente CONSTANTE encontrado: <?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://www.w3.org/2003/05/soap-envelope">
+	<soapenv:Body>
+		<RESPONSE_ACK xmlns="http://www.comptel.com/ilink/api/soap/2005/09" 
+		ACK_STATUS="]
+[2018Aug08 21:53:50,799][DEBUG][1533774651723][compileCmd NameSustitutionCmdAdapter.java:63][Componente VARIABLE encontrado: code]
+[2018Aug08 21:53:50,804][DEBUG][1533774651723][compileCmd NameSustitutionCmdAdapter.java:78][Componente CONSTANTE encontrado: "
+		ACK_SMESSAGE="]
+[2018Aug08 21:53:50,806][DEBUG][1533774651723][compileCmd NameSustitutionCmdAdapter.java:63][Componente VARIABLE encontrado: msg]
+[2018Aug08 21:53:50,808][DEBUG][1533774651723][compileCmd NameSustitutionCmdAdapter.java:78][Componente CONSTANTE encontrado: "/>
+	</soapenv:Body>
+</soapenv:Envelope>
+]

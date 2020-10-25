@@ -1,0 +1,27 @@
+<soapenv:Envelope xmlns:ccws="http://comverse-in.com/prepaid/ccws" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+       <soapenv:Header>
+        <ccws:VersionInfoHeader>
+            <!--Optional:-->
+            <ccws:ProductVersion>1</ccws:ProductVersion>
+            <!--Optional:-->
+            <ccws:CustomerVersion>1</ccws:CustomerVersion>
+        </ccws:VersionInfoHeader>
+    </soapenv:Header>	
+	<soapenv:Body>
+		<ccws:CreateSubscriber>
+			<ccws:subscriber>
+				<ccws:SubscriberID>58${msisdn:1}</ccws:SubscriberID>
+				<ccws:SubscriberInfo>
+					<ccws:Address1>${puk}</ccws:Address1>
+					<ccws:Address2>${puk2}</ccws:Address2>
+				</ccws:SubscriberInfo>
+				<ccws:Subscriber>
+					<ccws:COSName>${plan}</ccws:COSName>
+					<ccws:PINChangeNeeded>0</ccws:PINChangeNeeded>
+					<ccws:IMSI>${imsi}</ccws:IMSI>
+				</ccws:Subscriber>
+				<ccws:SPName>DIGITEL</ccws:SPName>
+			</ccws:subscriber>
+		</ccws:CreateSubscriber>
+	</soapenv:Body>
+</soapenv:Envelope>
